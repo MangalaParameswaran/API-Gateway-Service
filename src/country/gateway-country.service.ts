@@ -21,10 +21,15 @@ export class GatewayCountryService {
   
   async searchCountry(countryName: string) {
     try {
-      const result = await axios.get(`${this.configService.get<string>('COUNTRY_API')}${countryName}}`)
-      console.log('result-------get-', result.data)
-
-      return result.data;
+      
+      const result = await axios.get(`${this.configService.get<string>('COUNTRY_API')}${countryName}`);
+      if (Array.isArray(result.data) && result.data.length > 0) {
+        const countryWithWeather = await getCountryWithWeather(result.data[0], this.weatherApi);
+        console.log('result-------get-', countryWithWeather);
+        return countryWithWeather;
+      } else {
+        throw new HttpException('Country not found', HttpStatus.NOT_FOUND);
+      }
 
     } catch (error) {
       throw new HttpException('Country does not exist on search',HttpStatus.BAD_REQUEST)

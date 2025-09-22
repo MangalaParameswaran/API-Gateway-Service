@@ -10,7 +10,7 @@ import { GatewayAuthModule } from 'src/auth/gateway-auth.module';
       {
         name: 'COUNTRY_SERVICE',
         transport: Transport.TCP,
-        options: { port: 3002 }
+        options: { port: 3005 }
       }
     ]),
     GatewayAuthModule

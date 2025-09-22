@@ -3,7 +3,7 @@ import { GatewayCountryService } from './gateway-country.service';
 import { GatewayAuthGuard } from 'src/gateway-auth';
 
 @Controller('country')
-// @UseGuards(GatewayAuthGuard)
+@UseGuards(GatewayAuthGuard)
 export class GatewayCountryController {
   constructor(private readonly countryService: GatewayCountryService) {}
 
