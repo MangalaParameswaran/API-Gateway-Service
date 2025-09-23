@@ -14,14 +14,12 @@ export class GatewayCountryController {
 
   @Post('save/user/countries')
   create(@Body() createCountryDto: any) {
-    console.log('------', createCountryDto);
-    
     return this.countryService.addcountry(createCountryDto);
   }
 
   @Get('user/countries/:id')
   findOne(@Param('id') id: string) {
-    return this.countryService.getUserCountries(+id);
+    return this.countryService.getUserCountries(id);
   }
 
   @Delete('user/countries')

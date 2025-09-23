@@ -25,7 +25,7 @@ export class GatewayCountryService {
       const result = await axios.get(`${this.configService.get<string>('COUNTRY_API')}${countryName}`);
       if (Array.isArray(result.data) && result.data.length > 0) {
         const countryWithWeather = await getCountryWithWeather(result.data[0], this.weatherApi);
-        console.log('result-------get-', countryWithWeather);
+        // console.log('result-------get-', countryWithWeather);
         return countryWithWeather;
       } else {
         throw new HttpException('Country not found', HttpStatus.NOT_FOUND);
@@ -39,32 +39,43 @@ export class GatewayCountryService {
   async addcountry(createCountryDto: any) {
     try {
       const result = await lastValueFrom(this.countryServiceClient.send({cmd: 'create_country'}, createCountryDto));
-      console.log('result-----add---', result)
+      console.log('result-----add---', result.data)
+      const countryWithWeather = await getCountryWithWeather(result.data, this.weatherApi);
+      console.log('countryWithWeather---', countryWithWeather);
 
-      return getCountryWithWeather(result.data, this.weatherApi)
-      
+      return {
+        success: true,
+        data: countryWithWeather
+      };
+
     } catch (error) {
-      throw new HttpException('Country does not exist on add',HttpStatus.BAD_REQUEST)
+      throw new HttpException('Country does not exist to add',HttpStatus.BAD_REQUEST)
     }
   }
 
-  async getUserCountries(id: number) {
+  async getUserCountries(id: string) {
     try {
       const result = await lastValueFrom(this.countryServiceClient.send({cmd: 'find_country_by_id'}, id));
       console.log('result--getid------', result)
-      let  countriesWithWeather:any = await Promise.all(
-        result.map(async (country: any)=> await getCountryWithWeather(country,this.weatherApi) )
+      let countriesWithWeather:any = await Promise.all(
+        result.data.map(async (country: any)=> await getCountryWithWeather(country,this.weatherApi) )
       )
-      return countriesWithWeather
+      return {
+        success: true,
+        data: countriesWithWeather
+      }
     } catch (error) {
-      throw new GatewayTimeoutException(`Connection to country service is interrupted ${error.message}`)
+      throw new GatewayTimeoutException(`${error.message}`)
     }
   }
 
   async deleteUserCountries(obj: any) {
     try {
       const result = await lastValueFrom(this.countryServiceClient.send({cmd: 'remove_country'}, obj));
-      return result;
+      return {
+        success: true,
+        data: result
+      };
       
     } catch (error) {
       throw new GatewayTimeoutException(`Connection to country service is interrupted ${error.message}`)

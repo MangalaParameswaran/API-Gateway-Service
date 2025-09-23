@@ -15,9 +15,6 @@ export class GatewayAuthGuard implements CanActivate {
     const token = authHeader.split(' ')[1];
     const result = await lastValueFrom(this.client.send({ cmd: 'validate_token' }, token));
 
-    console.log('observalbe-----', this.client.send({ cmd: 'validate_token' }, token));
-    
-
     if (!result) throw new UnauthorizedException('Invalid token');
     req.user = result;
     return true;

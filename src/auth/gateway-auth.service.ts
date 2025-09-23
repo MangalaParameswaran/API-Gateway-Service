@@ -22,7 +22,10 @@ export class GatewayAuthService {
 
   async login(loginData: LoginDto) {
     try {
-      return await lastValueFrom(this.authClient.send({cmd: 'login_user'}, loginData))
+      const result = await lastValueFrom(this.authClient.send({cmd: 'login_user'}, loginData));
+      console.log('login result---', result);
+      
+      return result;
     } catch (error) {
       throw new GatewayTimeoutException('User service connection failed');
     }
