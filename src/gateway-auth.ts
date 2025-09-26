@@ -4,7 +4,7 @@ import { lastValueFrom } from 'rxjs';
 
 @Injectable()
 export class GatewayAuthGuard implements CanActivate {
-  constructor(@Inject('AUTH_SERVICE') private client: ClientProxy) {}
+  constructor(@Inject('AUTH_SERVICE') private client: ClientProxy) { }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest();
@@ -13,11 +13,19 @@ export class GatewayAuthGuard implements CanActivate {
     if (!authHeader) throw new UnauthorizedException('Missing token');
 
     const token = authHeader.split(' ')[1];
-    const result = await lastValueFrom(this.client.send({ cmd: 'validate_token' }, token));
+    try {
+      const result = await lastValueFrom(this.client.send({ cmd: 'validate_token' }, {token, type: 'access'}));
+      if (!result) throw new UnauthorizedException('Invalid token');
+      req.user = result;
+      return true;
+    } catch (error) {
+      console.log('error new', error);
+      if (error.message === 'jwt expired') {
+        throw new UnauthorizedException({ message: 'Token expired', refresh: true });
+      }
+      throw new UnauthorizedException('Invalid token');
+    }
 
-    if (!result) throw new UnauthorizedException('Invalid token');
-    req.user = result;
-    return true;
   }
 
 }
